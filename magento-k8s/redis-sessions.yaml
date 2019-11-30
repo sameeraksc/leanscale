@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  name: sessions
+spec:
+  type: ClusterIP
+  ports:
+  - port: 6379
+    protocol: TCP
+    targetPort: 6379
+  selector:
+    run: sessions
+status:
+  loadBalancer: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    run: sessions
+  name: sessions
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: sessions
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        run: sessions
+    spec:
+      containers:
+      - image: redis
+        name: sessions
+        ports:
+        - containerPort: 6379
+        resources: {}
+status: {}

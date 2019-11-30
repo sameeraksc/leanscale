@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  name: cache
+spec:
+  type: ClusterIP
+  ports:
+  - port: 6379
+    protocol: TCP
+    targetPort: 6379
+  selector:
+    run: cache
+status:
+  loadBalancer: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    run: cache
+  name: cache
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: cache
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        run: cache
+    spec:
+      containers:
+      - image: fballiano/redis-volatile
+        name: cache
+        ports:
+        - containerPort: 6379
+        resources: {}
+status: {}

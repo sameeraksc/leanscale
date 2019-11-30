@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    io.kompose.service: varnish
+  name: varnish
+spec:
+  type: NodePort
+  ports:
+  - name: "80"
+    port: 80
+    targetPort: 80
+    nodePort: 30002
+  - name: "6082"
+    port: 6082
+    targetPort: 6082
+    nodePort: 30001
+  selector:
+    io.kompose.service: varnish
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: varnish
+  name: varnish
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: varnish
+    spec:
+      containers:
+      - env:
+        - name: CACHE_SIZE
+          value: 256M
+        image: sameeraksc/varnish
+        name: varnish
+        ports:
+        - containerPort: 80
+        - containerPort: 6082
+      restartPolicy: Always

@@ -1,0 +1,75 @@
+#apiVersion: v1
+#kind: PersistentVolume
+#metadata:
+#  name: task-pv-volume
+#  labels:
+#    app: magento
+#spec:
+#  capacity:
+#    storage: 2Gi
+#  accessModes:
+#    - ReadWriteOnce
+#  hostPath:
+#    path: "/home/centos"
+#---
+#kind: PersistentVolumeClaim
+#apiVersion: v1
+#metadata:
+#  name: apache-volumeclaim
+#  labels:
+#    app: magento
+#spec:
+#  accessModes:
+#    - ReadWriteOnce
+#  resources:
+#    requests:
+#      storage: 2Gi
+#---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: magento
+  name: magento
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: magento
+    tier: frontend
+---      
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: magento
+  labels:
+    app: magento
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: magento
+      tier: frontend
+  strategy:
+    type: Recreate    
+  template:
+    metadata:
+      labels:
+        app: magento
+        tier: frontend
+    spec:
+      containers:
+        - image: sameeraksc/magentov3-prod
+          name: magento
+          ports:
+            - containerPort: 80
+              name: magento
+#          volumeMounts:
+#           - name: apache-persistent-storage
+#             mountPath: /var/www/html/pub
+#      volumes:
+#       - name: apache-persistent-storage
+#         persistentVolumeClaim:
+#           claimName: apache-volumeclaim
